@@ -1,27 +1,11 @@
 import React from 'react';
 import SwaggerUI from "swagger-ui-react";
-import "swagger-ui-react/swagger-ui.css";
-import ModalsPlugin from 'swagger-editor/plugins/modals';
-import DialogsPlugin from 'swagger-editor/plugins/dialogs';
-import DropdownMenuPlugin from 'swagger-editor/plugins/dropdown-menu';
-import DropzonePlugin from 'swagger-editor/plugins/dropzone';
-import VersionsPlugin from 'swagger-editor/plugins/versions';
-import EditorTextareaPlugin from 'swagger-editor/plugins/editor-textarea';
-import EditorMonacoPlugin from 'swagger-editor/plugins/editor-monaco';
-import EditorMonacoLanguageApiDOMPlugin from 'swagger-editor/plugins/editor-monaco-language-apidom';
-import EditorContentReadOnlyPlugin from 'swagger-editor/plugins/editor-content-read-only';
-import EditorContentOriginPlugin from 'swagger-editor/plugins/editor-content-origin';
 import EditorContentTypePlugin from 'swagger-editor/plugins/editor-content-type';
-import EditorContentPersistencePlugin from 'swagger-editor/plugins/editor-content-persistence';
-import EditorContentFixturesPlugin from 'swagger-editor/plugins/editor-content-fixtures';
-import EditorPreviewPlugin from 'swagger-editor/plugins/editor-preview';
-import EditorPreviewSwaggerUIPlugin from 'swagger-editor/plugins/editor-preview-swagger-ui';
 import EditorPreviewAsyncAPIPlugin from 'swagger-editor/plugins/editor-preview-asyncapi';
-import EditorPreviewApiDesignSystemsPlugin from 'swagger-editor/plugins/editor-preview-api-design-systems';
-import TopBarPlugin from 'swagger-editor/plugins/top-bar';
-import SplashScreenPlugin from 'swagger-editor/plugins/splash-screen';
-import LayoutPlugin from 'swagger-editor/plugins/layout';
-import EditorSafeRenderPlugin from 'swagger-editor/plugins/editor-safe-render';
+import EditorPreviewAPIDesignSystemsPlugin from 'swagger-editor/plugins/editor-preview-api-design-systems';
+import SwaggerUIAdapterPlugin from 'swagger-editor/plugins/swagger-ui-adapter';
+import "swagger-editor/swagger-editor.css";
+
 
 function App() {
   return (
@@ -216,27 +200,11 @@ function App() {
       }
       }
       plugins={[
-        ModalsPlugin,
-        DialogsPlugin,
-        DropdownMenuPlugin,
-        DropzonePlugin,
-        VersionsPlugin,
-        EditorTextareaPlugin,
-        EditorMonacoPlugin,
-        EditorMonacoLanguageApiDOMPlugin,
-        EditorContentReadOnlyPlugin,
-        EditorContentOriginPlugin,
         EditorContentTypePlugin,
-        EditorContentPersistencePlugin,
-        EditorContentFixturesPlugin,
-        EditorPreviewPlugin,
-        EditorPreviewSwaggerUIPlugin,
         EditorPreviewAsyncAPIPlugin,
-        EditorPreviewApiDesignSystemsPlugin,
-        TopBarPlugin,
-        SplashScreenPlugin,
-        LayoutPlugin,
-        EditorSafeRenderPlugin,
+        EditorPreviewAPIDesignSystemsPlugin,
+        SwaggerUIAdapterPlugin,
+        SwaggerUI.plugins.DownloadUrl,
       ]}
     />
   );
