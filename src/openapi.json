@@ -1,0 +1,203 @@
+{
+    "openapi": "3.0.0",
+    "x-sap-compliance-level": "sap:core:v1",
+    "x-sap-extensible": {
+      "type": "automatic"
+    },
+    "servers": [
+      {
+        "url": "https://{subdomain}-plc-{space}.cfapps.sap.hana.ondemand.com",
+        "description": "Access a productive or test landscape, depending on your subdomain and PaaS account space.",
+        "variables": {
+          "subdomain": { "description": "A subdomain of the customer&#39;s global account.", "default": "auitdevsaas0" },
+          "space": { "description": "A paas account space name.", "default": "devpaasspace" }
+        }
+      },
+      {
+        "url": "https://sandbox.api.sap.com/foo/bar",
+        "description": "Sandbox URL"
+      }
+    ],
+    "info": {
+      "description": "Provides the functionality that allows retrieving account details when having a list of account ids. This is useful when you have a list of entities that contain account ids (e.g. price components, one time project costs), but you need more account information, like the controlling area id or the account name (in the provided or default language).",
+      "version": "4.3.0",
+      "title": "Search for Account Entities"
+    },
+    "x-sap-shortText": "Allows you to search multiple accounts by a list of ids.",
+    "tags": [{ "name": "Account", "description": "API for searching acounts" }],
+    "paths": {
+      "/accounts/search": {
+        "post": {
+          "tags": ["Account"],
+          "summary": "Finds (currently valid) accounts (split by page).",
+          "description": "Search for one or more accounts when you know the accounts ids. The result will contain a paged list of results of the matching entities. The texts associated with the accounts will be in the language specified in the language query parameter. If no language will be specified, the result will be in English.",
+          "operationId": "search",
+          "parameters": [
+            {
+              "name": "x-csrf-token",
+              "in": "header",
+              "description": "The cross site request forgery prevention token (can be retrieved with a get on the same url, having the x-csrf-token header set to <b><i>fetch</i></b>)",
+              "required": true,
+              "schema": { "type": "string", "maxLength": 100 }
+            },
+            {
+              "name": "language",
+              "in": "query",
+              "description": "The language for the account description",
+              "required": false,
+              "schema": { "type": "string", "default": "EN" },
+              "example": "EN"
+            },
+            {
+              "name": "top",
+              "in": "query",
+              "description": "The maximum number of items in the response",
+              "required": false,
+              "schema": { "type": "integer", "minimum": 1, "maximum": 10000, "default": 100 }
+            },
+            {
+              "name": "skip",
+              "in": "query",
+              "description": "The number of items to skip while building the response",
+              "required": false,
+              "schema": { "type": "integer", "default": 0, "minimum": 0 }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/AccountSearch" },
+                  "minItems": 1,
+                  "maxItems": 10000
+                }
+              }
+            },
+            "description": "An array of account ids",
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "successful operation",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": { "entities": { "type": "array", "items": { "$ref": "#/components/schemas/Account" } } }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "invalid input (request param validation)",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "code": { "type": "string" },
+                      "message": { "type": "string" },
+                      "target": { "type": "string" },
+                      "correlationId": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "unauthorized (action requires user authentication)",
+              "content": {
+                "text/plain": { "schema": { "type": "string", "default": "Unauthorized", "example": "Unauthorized" } }
+              }
+            },
+            "403": {
+              "description": "forbidden (user is authenticated but does not have privilleges to the requested operation)",
+              "content": {
+                "text/plain": { "schema": { "type": "string", "default": "Forbidden", "example": "Forbidden" } }
+              }
+            }
+          },
+          "security": [{ "plc_auth": ["Base", "AcctR"] }]
+        }
+      }
+    },
+    "security": [{ "plc_auth": ["Base", "AcctR"] }],
+    "components": {
+      "schemas": {
+        "BaseErrorResponse": {
+          "type": "object",
+          "properties": {
+            "code": { "type": "string" },
+            "message": { "type": "string" },
+            "target": { "type": "string" },
+            "correlationId": { "type": "string" }
+          }
+        },
+        "Texts": {
+          "type": "object",
+          "properties": {
+            "language": { "type": "string", "maxLength": 11 },
+            "description": { "type": "string", "maxLength": 250 }
+          },
+          "required": ["language", "description"]
+        },
+        "Account": {
+          "allOf": [
+            { "$ref": "#/components/schemas/AccountSearch" },
+            {
+              "type": "object",
+              "properties": {
+                "validFrom": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Used to define the validity of master data"
+                },
+                "validTo": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Used to define the validity of master data"
+                },
+                "source": { "type": "integer", "description": "Used to define the validity of master data" },
+                "createdBy": { "type": "string", "description": "User that created the activity type", "maxLength": 256 },
+                "texts": { "type": "array", "items": { "$ref": "#/components/schemas/Texts" } }
+              }
+            }
+          ]
+        },
+        "AccountSearch": {
+          "type": "object",
+          "properties": {
+            "accountId": {
+              "type": "string",
+              "description": "Entity Id.",
+              "maxLength": 10,
+              "pattern": "^[\\p{Lu}\\d_:#.\\/\\-\\|+)(`](?:[\\p{Lu}\\d_:#.\\/\\-\\| +`)(]*[\\p{Lu}\\d_:#.\\/\\-\\|+`)(])?$",
+              "example": "#CC1"
+            },
+            "controllingAreaId": {
+              "type": "string",
+              "description": "Entity Id.",
+              "maxLength": 4,
+              "pattern": "^[\\p{Lu}\\d_:#.\\/\\-\\|+)(`](?:[\\p{Lu}\\d_:#.\\/\\-\\| +`)(]*[\\p{Lu}\\d_:#.\\/\\-\\|+`)(])?$",
+              "example": "#CA1"
+            }
+          },
+          "required": ["accountId", "controllingAreaId"]
+        }
+      },
+      "securitySchemes": {
+        "plc_auth": {
+          "type": "oauth2",
+          "flows": {
+            "authorizationCode": {
+              "authorizationUrl": "https://{subdomain}.authentication.sap.hana.ondemand.com/oauth/authorize",
+              "tokenUrl": "https://{subdomain}.authentication.sap.hana.ondemand.com/oauth/token",
+              "scopes": { "Base": "Basic API access", "AcctR": "Account read" }
+            }
+          }
+        }
+      }
+    }
+  }
+  
